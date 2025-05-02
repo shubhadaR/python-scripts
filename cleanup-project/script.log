@@ -1,0 +1,26 @@
+2025-05-02 23:25:49,319 INFO: script started
+2025-05-02 23:25:57,146 INFO: created logs/abc1.tmp successfully
+2025-05-02 23:25:57,146 INFO: created logs/abc2.tmp successfully
+2025-05-02 23:25:57,147 INFO: created logs/abc3.tmp successfully
+2025-05-02 23:25:57,147 INFO: file logs/abc2.tmp deleted successfully
+2025-05-02 23:25:57,148 INFO: file logs/abc1.tmp deleted successfully
+2025-05-02 23:25:57,148 INFO: file logs/abc3.tmp deleted successfully
+2025-05-02 23:25:57,148 INFO: 3 files deleted
+2025-05-02 23:26:49,499 INFO: script started
+2025-05-02 23:26:57,027 ERROR:  file logs/abc1.txt already exist
+2025-05-02 23:26:57,028 ERROR:  file logs/abc2.txt already exist
+2025-05-02 23:26:57,028 ERROR:  file logs/abc3.txt already exist
+2025-05-02 23:26:57,029 ERROR: No tmp file found
+2025-05-02 23:30:28,129 INFO: script started
+2025-05-02 23:30:35,817 INFO: created logs/abc1.tmp successfully
+2025-05-02 23:30:35,818 INFO: created logs/abc2.tmp successfully
+2025-05-02 23:30:35,819 INFO: created logs/abc3.tmp successfully
+2025-05-02 23:30:35,819 INFO: file logs/abc2.tmp deleted successfully
+2025-05-02 23:30:35,820 INFO: file logs/abc1.tmp deleted successfully
+2025-05-02 23:30:35,820 INFO: file logs/abc3.tmp deleted successfully
+2025-05-02 23:30:35,820 INFO: 3 files deleted
+2025-05-02 23:30:56,702 INFO: script started
+2025-05-02 23:31:05,166 INFO: created logs/a1.tmp successfully
+2025-05-02 23:31:05,166 INFO: file logs/a1.tmp deleted successfully
+2025-05-02 23:31:05,167 INFO: 1 files deleted
+2025-05-02 23:31:05,167 INFO: After cleanup log dir: ['abc3.txt', 'abc1.txt', 'abc2.txt']
