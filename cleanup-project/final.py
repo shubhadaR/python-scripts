@@ -1,5 +1,6 @@
 import os
 import logging
+from find_word import tail_log_file
 
 logging.basicConfig(filename='script.log', level=logging.INFO, format="%(asctime)s %(levelname)s: %(message)s")
 
@@ -36,6 +37,7 @@ def main():
     ext= input("enter ext of file")
 
     create_file(dir, name, count, ext)
+    tail_log_file("script.log", "ERROR" )
     cleanup_tmp(dir)
 
     logging.info(f"After cleanup log dir: {os.listdir(dir)}")

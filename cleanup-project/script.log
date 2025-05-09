@@ -24,3 +24,31 @@
 2025-05-02 23:31:05,166 INFO: file logs/a1.tmp deleted successfully
 2025-05-02 23:31:05,167 INFO: 1 files deleted
 2025-05-02 23:31:05,167 INFO: After cleanup log dir: ['abc3.txt', 'abc1.txt', 'abc2.txt']
+2025-05-02 23:26:57,027 ERROR:  file logs/abc1.txt already exist
+
+2025-05-09 16:28:55,396 INFO: script started
+2025-05-09 16:29:03,787 INFO: created logs/abc1.log successfully
+2025-05-09 16:29:03,788 INFO: created logs/abc2.log successfully
+2025-05-09 16:29:03,788 INFO: created logs/abc3.log successfully
+2025-05-09 16:29:19,721 INFO: script started
+2025-05-09 16:29:24,513 INFO: created logs/a1.log successfully
+2025-05-09 16:29:24,514 INFO: created logs/a2.log successfully
+2025-05-09 16:29:24,515 INFO: created logs/a3.log successfully
+2025-05-09 16:30:50,754 INFO: script started
+2025-05-09 16:30:55,173 ERROR:  file logs/a1.log already exist
+2025-05-09 16:30:55,173 ERROR:  file logs/a2.log already exist
+2025-05-09 16:30:55,174 ERROR:  file logs/a3.log already exist
+2025-05-09 16:30:55,175 ERROR: No tmp file found
+2025-05-09 16:30:55,175 INFO: After cleanup log dir: ['a3.log', 'a2.log', 'abc3.log', 'a1.log', 'abc3.txt', 'abc1.txt', 'abc1.log', 'abc2.log', 'abc2.txt']
+2025-05-09 16:37:12,537 INFO: script started
+2025-05-09 16:37:19,805 ERROR:  file logs/a1.log already exist
+2025-05-09 16:37:19,805 ERROR:  file logs/a2.log already exist
+2025-05-09 16:37:19,806 ERROR:  file logs/a3.log already exist
+2025-05-09 16:37:19,806 ERROR: No tmp file found
+2025-05-09 16:37:19,807 INFO: After cleanup log dir: ['a3.log', 'a2.log', 'abc3.log', 'a1.log', 'abc3.txt', 'abc1.txt', 'abc1.log', 'abc2.log', 'abc2.txt']
+2025-05-09 16:37:59,830 INFO: script started
+2025-05-09 16:38:04,340 ERROR:  file logs/a1.log already exist
+2025-05-09 16:38:04,340 ERROR:  file logs/a2.log already exist
+2025-05-09 16:38:04,340 ERROR:  file logs/a3.log already exist
+2025-05-09 16:38:04,341 ERROR: No tmp file found
+2025-05-09 16:38:04,341 INFO: After cleanup log dir: ['a3.log', 'a2.log', 'abc3.log', 'a1.log', 'abc3.txt', 'abc1.txt', 'abc1.log', 'abc2.log', 'abc2.txt']
