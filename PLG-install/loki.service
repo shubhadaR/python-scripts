@@ -1,0 +1,10 @@
+[Unit]
+Description=Loki log aggregation system
+After=network.target
+
+[Service]
+ExecStart=/etc/loki/loki -config.file=/etc/loki/loki-local-config.yaml -print-config-stderr -log.level=debug
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

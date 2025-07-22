@@ -1,0 +1,1578 @@
+<!DOCTYPE html>
+<html>
+<!-- <head>
+  <title>SMSC Alarm Monitor</title>
+  <style>
+    body { font-family: sans-serif; text-align: center; margin-top: 50px; transition: background 0.5s; }
+    #status { font-size: 24px; margin-top: 20px; }
+  </style>
+</head> -->
+<head>
+  <meta charset="UTF-8">
+  <title>SMSC Alarm Monitor</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Flatpickr CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-zzzzz"
+    crossorigin="anonymous">
+  <style>
+    body {
+    font-family: 'Inter', sans-serif;
+    color: #1f2937; /* dark slate */
+    background-color: #f9fafb;
+    }
+
+    h1, h2 {
+      font-weight: 600;
+      text-align: left;
+      margin-bottom: 10px;
+    }
+
+    .top-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      flex-wrap: wrap; /* optional for small screen responsiveness */
+    }
+
+    .top-bar p {
+      margin: 0;
+      padding: 6px 12px;
+      background: #f3f4f6;
+      border-radius: 6px;
+      font-size: 14px;
+      color: #374151;
+      height: 34px;
+      display: flex;
+      align-items: center;
+    }
+
+    /* Sound toggle button */
+    #soundToggle {
+      height: 34px;
+      padding: 0 14px;
+      font-size: 13px;
+      font-weight: 500;
+      background-color: #4b5563;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      width: fit-content; /* Prevent full-width */
+    }
+
+    /* Compact orange download button */
+    .download-trigger {
+      height: 34px;
+      padding: 0 14px;
+      font-size: 13px;
+      font-weight: 500;
+      background-color: #f97316;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      white-space: nowrap;
+      display: flex;
+      align-items: center;
+      width: fit-content; /* Prevent full-width */
+    }
+
+    .download-trigger:hover {
+      background-color: #ea580c;
+    }
+
+#soundToggle:hover {
+  background-color: #374151;
+}
+
+    .modal-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 32px;
+      border-radius: 10px;
+      width: 700px;
+      max-width: 95%;
+      max-height: 90vh;
+      overflow-y: auto;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+    }
+
+    .modal-content p,
+    .modal-content span,
+    .modal-content pre {
+      font-size: 15px;
+      line-height: 1.5;
+      color: #1f2937;
+    }
+    .modal-content h3 {
+      font-size: 22px;
+      margin-bottom: 20px;
+    }
+
+
+    .modal-content label {
+      display: block;
+      margin-top: 10px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .modal-content input,
+    .modal-content select {
+      width: 100%;
+      margin-top: 6px;
+      margin-bottom: 16px;
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .modal-actions button {
+      padding: 8px 16px;
+      font-size: 13px;
+      border-radius: 5px;
+      border: none;
+      cursor: pointer;
+    }
+
+    .modal-actions button[type="submit"] {
+      background-color: #10b981;
+      color: white;
+    }
+
+    .modal-actions button[type="button"] {
+      background-color: #e5e7eb;
+      color: #111827;
+    }
+
+
+    form {
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      max-width: 400px;
+      background: #f9f9f9;
+    }
+
+    label {
+      display: block;
+      margin-top: 10px;
+      margin-bottom: 5px;
+    }
+
+    input, select, button {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 10px;
+      border-radius: 4px;
+      border: 1px solid #aaa;
+    }
+
+    button {
+      background-color: #007BFF;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background-color: #0056b3;
+    }
+
+    #overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: linear-gradient(145deg, #dce3e9, #9cb4c9, #52738d);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    #modal {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      text-align: center;
+      max-width: 90%;
+      box-shadow: 0 0 10px black;
+    }
+
+    #modal button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      margin-top: 1rem;
+      cursor: pointer;
+
+    }
+    .status-boxes {
+      display: flex;
+      gap: 20px;
+      padding: 20px;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+      margin-top: 20px;
+    }
+
+    .status-box {
+      flex: 1;
+      padding: 16px;
+      border-left: 4px solid #d1d5db;
+      border-radius: 4px;
+      background-color: #f3f4f6;
+    }
+
+    .status-box strong {
+      font-size: 14px;
+      color: #4b5563;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .status-box div {
+      font-size: 24px;
+      font-weight: 600;
+      color: #111827;
+    }
+
+    table#oncallAlertsTable {
+      background: white;
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid #e5e7eb;
+      margin-top: 20px;
+      overflow: visible;
+    }
+
+    table thead {
+      background-color: #f9fafb;
+      text-transform: uppercase;
+      font-size: 12px;
+      color: #6b7280;
+    }
+
+    table th, table td {
+      padding: 12px 16px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+     .action-btn {
+           margin-right: 5px;
+         }
+    .filter-bar-horizontal {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 0;
+      flex-wrap: wrap; /* Wrap on small screens */
+    }
+
+    .filter-bar-horizontal > * {
+      flex: 1 1 180px; /* Each item gets equal width, min 180px */
+      height: 36px;
+      box-sizing: border-box;
+    }
+
+    .dropdown-toggle,
+    .btn-primary,
+    .btn-secondary {
+      width: 100%;     /* Uniform width */
+      height: 36px;    /* Uniform height */
+      font-size: 14px;
+    }
+
+    .dropdown-content.drop-up {
+      bottom: 100%;
+      top: auto;
+      margin-bottom: 6px;
+      box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .dropdown {
+      position: relative;
+    }
+
+    .dropdown-toggle {
+      padding: 6px 12px;
+      background: #ede9fe;
+      color: #5b21b6;
+      border: 1px solid #d8b4fe;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .dropdown-menu {
+      display: none;
+      position: absolute;
+      top: 100%; /* instead of 105% */
+      right: 0;   /* so it aligns under the button */
+      background: white;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      padding: 10px 12px;
+      z-index: 1000;
+      min-width: 160px;
+    }
+
+    .dropdown-menu label {
+      display: block;
+      font-size: 14px;
+      margin-bottom: 6px;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+      padding: 6px 14px;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      height: 36px;
+    }
+
+    .btn-primary {
+      background-color: #6366f1;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: #4f46e5;
+    }
+
+    .btn-secondary {
+      background-color: #fca5a5;
+      color: #7f1d1d;
+    }
+
+    .btn-secondary:hover {
+      background-color: #f87171;
+    }
+
+    .dropdown-menu input[type="checkbox"] {
+      margin-right: 6px;
+    }
+
+      .dropdown {
+          position: relative;
+      display: inline-block;
+    }
+
+        .dropdown-button {
+          color: white;
+          padding: 6px 12px;
+          font-size: 14px;
+          border: none;
+          border-radius: 5px;
+          cursor: pointer;
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          
+        }
+
+        .dropdown-button::after {
+          content: "▼";
+          font-size: 10px;
+          margin-left: 5px;
+        }
+        .dropdown-button.Firing {
+         background-color: #d63384; /* Dark Pink */
+        }
+
+        .dropdown-button.Acknowledged {
+          background-color: #ffc107; /* Yellow */
+          color: black; /* Yellow buttons need dark text */
+        }
+
+        .dropdown-button.Resolved {
+          background-color: #28a745; /* Green */
+        }
+
+        .dropdown-content {
+          display: none;
+          position: absolute;
+          background-color: #ffffff;
+          min-width: 160px;
+          box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+          z-index: 1000;
+          border-radius: 5px;
+          overflow: visible;
+          padding: 4px 0;
+        }
+
+        .dropdown-content.show {
+          display: block;
+        }
+
+        .dropdown-content button {
+          width: 100%;
+          padding: 8px 12px;
+          border: none;
+          background-color: white;
+          text-align: left;
+          cursor: pointer;
+          font-size: 14px;
+          color: black;
+        }
+        .dropdown-content button:hover {
+          background-color: #f1f1f1;
+}
+
+        .pagination-bar {
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 8px;
+        margin: 10px 0 0 auto;  /* aligns to bottom right */
+        padding-right: 16px;
+        font-size: 13px;
+        width: fit-content;
+        position: sticky;
+        bottom: 0;
+        background: white;
+        padding: 10px 16px;
+        box-shadow: 0 -2px 6px rgba(0,0,0,0.05);
+        z-index: 100;
+            }
+
+      .pagination-bar button {
+        padding: 4px 10px;
+        background-color: #2563eb;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        font-size: 13px;
+        min-width: 60px;
+        cursor: pointer;
+      }
+
+      .pagination-bar button:disabled {
+        background-color: #d1d5db;
+        color: #6b7280;
+        cursor: not-allowed;
+      }
+
+      .pagination-bar span {
+        font-size: 13px;
+      }
+      .status-box.active-tab {
+        border-left-color: #6366f1;
+        background-color: #eef2ff;
+        box-shadow: 0 0 0 2px #6366f1 inset;
+      }
+      #oncallAlertsTable {
+        margin-bottom: 150px; /* ensures room for dropdown above pagination */
+      }
+      /* Overlay background */
+    #loginModal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(17, 24, 39, 0.85); /* dark gray with transparency */
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    /* Login modal box */
+    #loginForm {
+      background: #1f2937; /* dark slate background */
+      padding: 40px;
+      border-radius: 12px;
+      box-shadow: 0 0 25px rgba(0, 0, 0, 0.5);
+      color: white;
+      width: 400px; /* wider modal */
+      max-width: 90%;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-top: 60px;
+    }
+
+    /* Login inputs */
+    #loginForm input {
+      padding: 10px;
+      font-size: 16px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    /* Login button */
+    #loginForm button {
+      padding: 12px;
+      font-size: 16px;
+      background-color: #10b981;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    /* Login failed message */
+    #loginError {
+      color: #f87171;
+      text-align: center;
+    }
+
+  </style>
+  <style>
+    .label-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      font-size: 14px;
+    }
+
+    .label-table th, .label-table td {
+      border: 1px solid #ccc;
+      padding: 6px 8px;
+      text-align: left;
+    }
+
+    .label-table th {
+      background-color: #f3f4f6;
+      color: #374151;
+    }
+
+
+  .submenu-toggle {
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    padding: 6px 12px;
+    cursor: pointer;
+    color: black;
+  }
+
+        .dropdown-submenu {
+        position: relative;
+        display: inline-block;
+      }
+
+      .submenu-options {
+        display: none;
+        position: absolute;
+        left: 100%;
+        top: 0;
+        background-color: #333;
+        padding: 4px 0;
+        min-width: 120px;
+        z-index: 1000;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+      }
+
+      .submenu-options button {
+        width: 100%;
+        padding: 8px 12px;
+        background: none;
+        color: white;
+        border: none;
+        text-align: left;
+        cursor: pointer;
+      }
+
+      .submenu-options button:hover {
+        background-color: #444;
+      }
+      .alerts-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-top: 40px;
+      flex-wrap: wrap; /* Optional: allows wrapping on small screens */
+    }
+
+    .alerts-header h2 {
+      margin: 0;
+    }
+
+    #alertsLoadedAt {
+      margin: 0;
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    .pagination-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #pageLoadingOverlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(4px);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #10b981;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0%   { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* hidden by default */
+    .submenu-options {
+      display: none;
+    }
+
+    /* shown when .show is added */
+    .submenu-options.show {
+      z-index: 2000;
+      margin-left: 6px; 
+      display: block !important; 
+    
+    }
+    /* hidden by default */
+   
+    /* ensure it stays aligned vertically */
+    .dropdown-submenu {
+      position: relative;
+    }
+
+
+    </style>
+
+</head>
+<body>
+  <h1>SMSC Alarm Monitor</h1>
+  <!--<div id="overlay">
+    <div id="modal">
+      <h2>🔊 Enable Alert Audio</h2>
+      <p>This site needs your permission to play alert sounds.</p>
+      <button id="enableAudioBtn">Enable Audio</button>
+    </div>
+  </div> -->
+  {% if session.get("logged_in") %}
+  <a href="{{ url_for('logout_ui', next='/tango') }}" id="logoutLink" style="position: absolute; top: 10px; right: 20px; display: block; background: #dc2626; color: white; padding: 6px 12px; border-radius: 5px; text-decoration: none;">
+    Logout
+  </a>
+  {% endif %}
+  <p style="color: white;">Session: {{ session }}</p>
+  {% if not session.get("logged_in") %}
+  <div id="overlay">
+        <div id="loginBanner" style="
+        position: absolute;
+        top: 20px;       /* adjust as needed */
+        left: 50%;
+        transform: translateX(-50%);
+        background: #3d4b63;
+        color: white;
+        padding: 48px 200px;
+        border-radius: 4px;
+        font-weight: bold;
+        font-size: 40px;
+        z-index: 10;
+
+      ">
+       SMSC Monitoring Portal
+      </div>
+        <form id="loginForm">
+      <input type="hidden" id="loginSource" name="source" value="" />
+      <h2 style="text-align: center;">Login</h2>
+      <input type="text" id="username" placeholder="Username" required style="padding: 10px;" />
+      <input type="password" id="password" placeholder="Password" required style="padding: 10px;" />
+      <button type="submit" style="padding: 10px; background: #10b981; color: white; border: none;">Login</button>
+      <p id="loginError" style="color: red; text-align: center;"></p>
+    </form>
+
+  </div>
+  {% endif %}
+
+
+  <div id="alertBanner" style="padding: 10px; background-color: white; color: black; font-weight: bold;">
+    Alerts Firing Banner
+  </div>
+  <div class="top-bar">
+    <p id="status">Waiting for alerts...</p>
+    <p id="lastChecked">Last checked: Never</p>
+    <div style="display: flex; gap: 10px; align-items: center;">
+      <button id="soundToggle">🔈 Sound: ON</button>
+      <button id="openDownloadModal" class="download-trigger">📥 Export Report</button>
+    </div>
+
+  </div>
+  <audio id="alertSound" src="/static/canada-eas-alarm-267663.mp3" preload="auto"></audio>
+  <div id="downloadModal" class="modal-overlay" style="display:none;">
+    <div class="modal-content">
+      <h3>📄 Download Report</h3>
+      <form action="/download/smsc" method="get">
+        <label for="dateRangeModal">Select Date Range:</label>
+        <input type="text" id="dateRangeModal" name="date_range" placeholder="YYYY-MM-DD to YYYY-MM-DD" required>
+
+        <label for="formatModal">Select Format:</label>
+        <select name="format" id="formatModal">
+          <option value="csv">CSV</option>
+          <option value="excel">Excel</option>
+        </select>
+
+        <div class="modal-actions">
+          <button type="submit">Download</button>
+          <button type="button" id="closeDownloadModal">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+  <!-- <div id="alertDetailsModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+      <h3>📋 Alert Details</h3>
+      <p><strong>Summary:</strong> <span id="modalSummary">Loading...</span></p>
+      <p><strong>Alert Name:</strong> <span id="modalAlertName">-</span></p>
+      <p><strong>Grafana Folder:</strong> <span id="modalFolder">-</span></p>
+      <p><strong>Labels:</strong> <pre id="modalLabels" style="white-space: pre-wrap;"></pre></p>
+      <div class="modal-actions">
+        <button type="button" onclick="closeAlertModal()">Close</button>
+      </div>
+    </div>
+  </div>  -->
+  <div id="alertDetailsModal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+
+      <h3>📋 Alert Details</h3>
+      <p><strong>Summary:</strong> <span id="modalSummary">Loading...</span></p>
+      <p><strong>Labels:</strong> <pre id="modalLabels" style="white-space: pre-wrap;"></pre></p>
+      <table id="modalLabelsTable">
+        <thead>
+          <tr>
+            <th>Key</th>
+            <th>Value</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div id="timelineSection">
+        <h3>📜 Timeline</h3>
+        <ul id="alertTimeline" style="list-style-type: none; padding-left: 0;"></ul>
+
+      </div>
+      <div class="modal-actions">
+        <button type="button" onclick="closeAlertModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+
+
+  <div class="alerts-header">
+    <h2>OnCall Alert Groups</h2>
+    <p id="alertsLoadedAt">Alerts last loaded: Never</p>
+    <div id="pagination" class="pagination-bar">
+      <button onclick="prevPage()" id="prevBtn" disabled>⬅ Prev</button>
+      <span id="currentPage">Page 1 of 73</span>
+      <button onclick="nextPage()" id="nextBtn">Next ➡</button>
+    </div>
+  </div>
+  <div id="loadingStatus" style="
+      display: none;
+      background: #f97316;
+      color: black;
+      padding: 6px 12px;
+      font-size: 14px;
+      text-align: center;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      width: 100%; /* Or max-content */
+      max-width: 300px;
+      margin-left: auto;
+      margin-right: auto;
+        ">
+      Loading...
+    </div>
+
+  <div class="status-boxes">
+    <div class="status-box status-filter" data-status="firing">
+      <strong>Firing</strong>
+      <div id="statusFiring">0</div>
+    </div>
+    <div class="status-box status-filter" data-status="acknowledged">
+      <strong>Acknowledged</strong>
+      <div id="statusAck">0</div>
+    </div>
+    <div class="status-box status-filter" data-status="resolved">
+      <strong>Resolved</strong>
+      <div id="statusResolved">0</div>
+    </div>
+    <div class="status-box status-filter" data-status="silenced">
+      <strong>Silenced</strong>
+      <div id="statusSilenced">0</div>
+    </div>
+  </div>
+
+
+  <table id="oncallAlertsTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Status</th>
+        <th>Title</th>
+        <th>Created</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  {% if session.get("logged_in") %}
+  <div id="pageLoadingOverlay">
+    <div class="spinner"></div>
+    <p style="color: white; margin-top: 10px;">Loading alerts...</p>
+  </div>
+  {% endif %}
+
+
+  <script>
+    const statusText = document.getElementById("status");
+    const alertSound = document.getElementById("alertSound");
+    const countText = document.getElementById("countText");
+    const toggleBtn = document.getElementById("soundToggle");
+
+    let soundEnabled = true;
+    let audioUnlocked = false;
+    if (localStorage.getItem("audioUnlocked") === "true") {
+      audioUnlocked = true;
+      console.log("Audio already unlocked from previous interaction");
+    }
+    const overlay = document.getElementById("overlay");
+    //const enableBtn = document.getElementById("enableAudioBtn");
+
+    //let audioUnlocked = false;
+
+    //enableBtn.addEventListener("click", async () => {
+    //  try {
+    //    await alertSound.play();
+    //    alertSound.pause();
+    //    alertSound.currentTime = 0;
+    //    audioUnlocked = true;
+    //    overlay.style.display = "none";
+    //    console.log("Audio unlocked via modal");
+    //  } catch (err) {
+    //    console.warn("Audio unlock failed:", err);
+    //    alert("Please interact again to enable audio.");
+    //  }
+    //});
+
+
+    toggleBtn.addEventListener("click", async () => {
+      soundEnabled = !soundEnabled;
+      toggleBtn.textContent = soundEnabled ? "🔈 Sound: ON" : "🔇 Sound: OFF";
+      if (!soundEnabled) {
+        alertSound.pause();             // Stop playing sound immediately
+        alertSound.currentTime = 0;
+      }
+
+
+    });
+
+
+    async function checkAlerts() {
+      const now = new Date().toLocaleTimeString();
+      document.getElementById("lastChecked").textContent = "Last checked: " + now;
+      console.log("Checking alerts at:", now);
+
+      const res = await fetch("/api/check/SMSC-Alarm");
+      const data = await res.json();
+
+
+
+      if (data.firing) {
+        statusText.textContent = "🔥 SMSC Alarm Firing!";
+
+
+        if (audioUnlocked) {
+        alertSound.play();
+        soundEnabled = true
+        toggleBtn.textContent = soundEnabled ? "🔈 Sound: ON" : "🔇 Sound: OFF";
+        }
+
+
+        let count = 0;
+        const banner = document.getElementById("alertBanner");
+        const blinkInterval = setInterval(() => {
+          banner.style.backgroundColor = banner.style.backgroundColor === "red" ? "white" : "red";
+          count++;
+          if (count >= 20) {
+            clearInterval(blinkInterval);
+            banner.style.backgroundColor = "white";
+          }
+        }, 500);
+        //const interval = setInterval(() => {
+        //
+        //  document.body.style.background = document.body.style.background === "red" ? "white" : "red";
+        //  count++;
+        //  if (count >= 20) {
+        //    clearInterval(interval);
+        //    document.body.style.background = "white";
+        //  }
+        //}, 500);
+
+      }
+      else {
+        statusText.textContent = "✅ No alarms firing.";
+      }
+    }
+
+    setInterval(checkAlerts, 15000);
+    checkAlerts();
+
+
+  </script>
+  <script>
+    let allAlerts = [];
+
+    let currentPage = 1;
+    const limit = 10;
+   
+    let totalPages = 1;
+    let currentStatusFilter = [];
+    let isInitialPageLoad = true;
+
+    async function fetchOnCallAlerts(page = 1, limit = 10) {
+      const overlay = document.getElementById("pageLoadingOverlay");
+      //if (overlay && isInitialPageLoad) {
+      //  overlay.style.display = "block";
+      //}
+      try {
+      const now = new Date().toLocaleTimeString();
+      currentPage = page;
+      const statusParam = currentStatusFilter.join(",");
+        const res = await fetch(`/api/oncall-alerts/smsc`);
+        console.log("fetching alerts at:", now);
+      if (!res.ok) throw new Error("Non-200 response");
+
+      // ✅ Success: update timestamp
+      const loadedAt = new Date().toLocaleString();
+      alertsLoadedAt.textContent = `✅ Alerts last loaded: ${loadedAt}`;
+      alertsLoadedAt.style.color = "#10b981";  // green
+
+
+      const data = await res.json();
+      const newAlerts = data.results || [];
+      console.log("length of new alerts:",newAlerts.length );
+      // If we got at least one alert, update everything;
+      // otherwise skip and leave the old UI alone
+      if (newAlerts.length > 0) {
+        allAlerts = newAlerts;
+      
+      }
+   
+      const total = data.total || allAlerts.length;
+      console.log("length of all alerts and total:",allAlerts.length, total );
+
+      const counts = { firing: 0, acknowledged: 0, resolved: 0, silenced: 0 };
+      allAlerts.forEach(g => {
+        const state = g.state.toLowerCase();
+        if (counts[state] !== undefined) counts[state]++;
+      });
+
+      document.getElementById("statusFiring").textContent = counts.firing;
+      document.getElementById("statusAck").textContent = counts.acknowledged;
+      document.getElementById("statusResolved").textContent = counts.resolved;
+      document.getElementById("statusSilenced").textContent = counts.silenced;
+      renderAlertsTable(allAlerts);
+    }
+        finally {
+      // ✅ Hide overlay only if it's the initial page load
+      if (overlay && isInitialPageLoad) {
+        overlay.style.display = "none";
+        isInitialPageLoad = false; // reset after first load
+      }
+    }
+
+    }
+    function getActionButtons(group) {
+      const status = group.state;
+      let actions = [];
+
+      if (status === "firing") {
+        actions = ["acknowledge", "resolve", "silence"];
+      } else if (status === "acknowledged") {
+        actions = ["unacknowledge", "resolve"];
+      } else if (status === "resolved") {
+        actions = ["unresolve"];
+      }
+      else if (status === "silenced") {
+        // allow the user to unsilence
+        actions = ["unsilence"];
+      }
+
+      return actions.map(action => {
+        if (action === "silence") {
+          return `
+            <div class="dropdown-submenu">
+              <button class="submenu-toggle" onclick="toggleSubmenu(this)">Silence ▸</button>
+              <div class="submenu-options">
+                <button onclick="performAlertAction('${group.id}', 'silence', 3600)">1h</button>
+                <button onclick="performAlertAction('${group.id}', 'silence', 10800)">3h</button>
+                <button onclick="performAlertAction('${group.id}', 'silence', 21600)">6h</button>
+                <button onclick="performAlertAction('${group.id}', 'silence', -1)">forever</button>
+              </div>
+            </div>
+          `;
+        } else {
+          return `<button onclick="performAlertAction('${group.id}', '${action}')">${capitalize(action)}</button>`;
+        }
+      }).join("");
+    }
+
+    function capitalize(str) {
+      return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+
+    function renderAlertsTable(data){
+      try{
+      const filtered = currentStatusFilter.length > 0
+        ? data.filter(group => group.state === currentStatusFilter[0])
+        : data;
+
+      const tableBody = document.querySelector("#oncallAlertsTable tbody");
+      tableBody.innerHTML = "";
+
+      if (filtered.length === 0) {
+        tableBody.innerHTML = `
+          <tr>
+            <td colspan="5" style="text-align:center; padding: 20px; color: #6b7280;">
+              🚫 No matching alerts found.
+            </td>
+          </tr>
+        `;
+        updatePaginationUI(1, 1);
+        return;
+      }
+
+      const start = (currentPage - 1) * limit;
+      const paginated = filtered.slice(start, start + limit);
+      totalPages = Math.ceil(filtered.length / limit);
+      updatePaginationUI(currentPage, totalPages);
+
+      paginated.forEach(group => {
+        const row = document.createElement("tr");
+        const status = group.state;
+        const alert = group?.last_alert?.payload?.alerts?.[0] || {};
+        const labels = alert.labels || {};
+        const annotations = alert.annotations || {};
+
+        const summary = annotations.summary || "-";
+        const alertname = labels.alertname || "-";
+        const folder = labels.grafana_folder || "-";
+        const actions = getActionButtons(group);  // abstracted for cleanliness
+
+        const dropdownId = `dropdown-${group.id}`;
+        const stateClass = status === "firing" ? "Firing"
+                        : status === "acknowledged" ? "Acknowledged"
+                        : status === "resolved" ? "Resolved"
+                        : "";
+
+        row.innerHTML = `
+          <td>${group.id}</td>
+          <td>${status}</td>
+          <td>
+            <a href="#" class="alert-link" data-alert='${JSON.stringify(alert).replace(/'/g, "&apos;")}' data-id="${group.id}">
+              ${group.title?.trim() || "-"}
+            </a>
+          </td>
+          <td>${new Date(group.created_at).toLocaleString()}</td>
+          <td>
+            <div class="dropdown" data-bs-display="static" data-bs-boundary="viewport">
+              <button class="dropdown-button ${stateClass}" data-bs-toggle="dropdown"
+              data-bs-flip="true"
+              aria-haspopup="true"
+              aria-expanded="false" onclick="toggleDropdown('${dropdownId}', this)" data-actions="${actions.replace(/"/g, '&quot;')}">
+                ${capitalize(group.state)}
+              </button>
+              <div class="dropdown-content" id="${dropdownId}">${actions}</div>
+            </div>
+          </td>
+        `;
+
+        tableBody.appendChild(row);
+      });
+
+
+
+          // Toggle dropdown visibility
+
+          window.toggleDropdown = function(id, button) {
+        // Close any existing open dropdowns
+        document.querySelectorAll('.dropdown .dropdown-content.show').forEach(existing => {
+          existing.classList.remove('show');
+          existing.remove();  // Only remove dynamically added ones
+        });
+      
+        const dropdownWrapper = button.closest(".dropdown");
+        if (!dropdownWrapper) return;
+      
+        // Create a new dropdown content container
+        const dropdown = document.createElement("div");
+        dropdown.className = "dropdown-content show";
+        dropdown.innerHTML = button.dataset.actions;
+        dropdown.style.position = "absolute";
+        dropdown.style.visibility = "hidden";  // So we can measure height before showing
+        dropdownWrapper.appendChild(dropdown); // Append inside the dropdown container
+      
+        // Now position it
+        const rect = button.getBoundingClientRect();
+        const dropdownHeight = dropdown.offsetHeight;
+        const spaceBelow = window.innerHeight - rect.bottom;
+        const spaceAbove = rect.top;
+      
+        if (spaceBelow < dropdownHeight + 10 && spaceAbove > dropdownHeight + 10) {
+          // Drop-up
+          dropdown.classList.add("drop-up");
+          dropdown.style.top = `auto`;
+          dropdown.style.bottom = `100%`;
+          dropdown.style.marginBottom = `6px`;
+        } else {
+          // Default drop-down
+          dropdown.style.top = `100%`;
+          dropdown.style.bottom = `auto`;
+        }
+      
+        dropdown.style.left = `0`;
+        dropdown.style.visibility = "visible";
+      
+        // 🔧 FIX: Attach submenu toggle listeners inside dropdown
+        dropdown.querySelectorAll(".submenu-toggle").forEach(btn => {
+          btn.addEventListener("click", function (e) {
+            e.stopPropagation();
+          
+            // Hide all other submenus inside this dropdown
+            dropdown.querySelectorAll(".submenu-options").forEach(el => {
+              if (el !== this.nextElementSibling) el.style.display = "none";
+            });
+          
+            // Toggle this submenu
+            const submenu = this.nextElementSibling;
+            submenu.style.display = submenu.style.display === "block" ? "none" : "block";
+          });
+        });
+        // Scroll page if dropdown still overflows viewport
+        const dropdownRect = dropdown.getBoundingClientRect();
+        const overflow = dropdownRect.bottom - window.innerHeight;
+        if (overflow > 0) {
+          window.scrollBy({ top: overflow + 10, behavior: 'smooth' });
+        }
+      
+
+              // Close on outside click
+          function outsideClick(e) {
+          if (!dropdown.contains(e.target) && !button.contains(e.target)) {
+            dropdown.remove();
+            document.removeEventListener("click", outsideClick);
+          }
+        }
+        document.addEventListener("click", outsideClick);
+      };
+
+
+
+         // Optional: Close dropdown if clicking outside
+        document.addEventListener('click', function (event) {
+        const isDropdown = event.target.closest('.dropdown');
+         if (!isDropdown) {
+                // Hide all open dropdowns
+            document.querySelectorAll('.dropdown-content').forEach(el => el.classList.remove('show'));
+
+         }
+        });
+
+
+      } catch (err) {
+      console.error("Failed to fetch alerts", err);
+
+      const failedAt = new Date().toLocaleTimeString();
+      alertsLoadedAt.textContent = `❌ Alerts failed to load at ${failedAt}`;
+      alertsLoadedAt.style.color = "#ef4444"; // red
+      }
+
+    }
+
+
+    function toggleSubmenu(button) {
+      const submenu = button.nextElementSibling;
+
+      button.closest('.dropdown-content')
+        .querySelectorAll('.submenu-options.show')
+        .forEach(el => el.classList.remove('show'));
+      // toggle this one
+      submenu.classList.toggle('show');
+    }
+
+    // This external click listener for submenus can be removed if the new parent dropdown logic handles it.
+    // However, if you want specific external click handling for submenus that persist even if the parent
+    // dropdown wasn't the target for closing, you could keep a more refined version.
+    document.addEventListener('click', function (e) {
+      if (!e.target.closest('.dropdown-submenu') && !e.target.closest('.dropdown-content')) {
+        document.querySelectorAll('.submenu-options').forEach(el => el.style.display = 'none');
+      }
+    });
+
+
+
+
+
+
+      function prevPage() {
+        if (currentPage > 1) {
+          currentPage--;
+          renderAlertsTable(allAlerts);
+        }
+      }
+
+      function nextPage() {
+        const filtered = currentStatusFilter.length > 0
+          ? allAlerts.filter(group => group.state === currentStatusFilter[0])
+          : allAlerts;
+
+        if (currentPage < Math.ceil(filtered.length / limit)) {
+          currentPage++;
+          renderAlertsTable(allAlerts);
+        }
+      }
+
+
+    function updatePaginationUI(current, total) {
+      document.getElementById("currentPage").textContent = `Page ${current} of ${total}`;
+      document.getElementById("prevBtn").disabled = current === 1;
+      document.getElementById("nextBtn").disabled = current === total;
+    }
+
+
+    //async function performAlertAction(id, action) {
+    //  const res = await fetch(`/api/oncall-alerts/${id}/${action}`, { method: "POST" });
+    //  const result = await res.json();
+    //  if (result.status === "success") {
+    //    alert(`Alert ${action}d`);
+    //    fetchOnCallAlerts(currentPage);
+    //  } else {
+    //    alert("Action failed: " + (result.message || result.error || result.code));
+    //  }
+    //}
+    async function performAlertAction(groupId, action, delay = null) {
+      let res;
+      let payload = {};
+      if (action === "silence") {
+        payload.delay = delay || -1; // fallback to 3 hours
+      }
+      const options = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      };
+
+      if (action === "silence") {
+        options.body = JSON.stringify({ delay: delay || -1 }); // or your custom delay
+        console.log("delay:", delay);
+        console.log("options payload:", options);
+        res = await fetch(`/api/oncall-alerts/${groupId}/${action}`, options);
+      }
+      else{
+          res = await fetch(`/api/oncall-alerts/${groupId}/${action}`, { method: "POST" });
+      }
+          const result = await res.json();
+          if (result.status === "success") {
+            //alert(`Alert ${action}d`);
+            fetchOnCallAlerts(currentPage);
+          } else {
+            alert("Action failed: " + (result.message || result.error || result.code));
+          }
+    }
+
+    function askCustomSilence(groupId) {
+      const input = prompt("Enter silence duration in hours:");
+      if (!input) return;
+      const hours = parseFloat(input);
+      if (isNaN(hours) || hours <= 0) {
+        alert("Invalid duration.");
+        return;
+      }
+      performAlertAction(groupId, 'silence', hours * 3600);
+    }
+
+
+    document.addEventListener("click", function (event) {
+      const link = event.target.closest(".alert-link");
+      if (!link) return;
+
+      event.preventDefault();
+      try {
+        const alertData = link.getAttribute("data-alert").replace(/&apos;/g, "'");
+        const groupId = link.getAttribute("data-id");
+        const alert = JSON.parse(alertData);
+        showAlertDetails(alert, groupId);
+      } catch (e) {
+        console.error("Failed to parse alert data", e);
+        alert("Unable to open alert details.");
+      }
+    });
+
+    document.querySelectorAll('.status-filter').forEach(box => {
+      box.style.cursor = "pointer";
+
+      box.addEventListener('click', function () {
+        const status = this.getAttribute("data-status");
+
+        // Clear active tab from all
+        document.querySelectorAll('.status-filter').forEach(b => b.classList.remove('active-tab'));
+
+        // If same status clicked again, deselect (toggle off)
+        if (currentStatusFilter[0] === status) {
+          currentStatusFilter = [];
+        } else {
+          this.classList.add('active-tab');
+          currentStatusFilter = [status];
+        }
+
+        currentPage = 1;
+        renderAlertsTable(allAlerts);
+      });
+    });
+
+    //window.addEventListener("load", () => {
+    //    const overlay = document.getElementById("pageLoadingOverlay");
+//
+    //    // Show loading for 10 seconds, then hide
+    //    if (overlay && overlay_load) {
+    //        overlay.style.display = "none";
+    //    }
+    //  });
+
+
+      window.addEventListener("load", () => {
+        fetchOnCallAlerts(1); // overlay will show only this time
+      });
+    setInterval(() => fetchOnCallAlerts(currentPage), 10000);
+
+  </script>
+  <!-- Flatpickr assets -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script>
+  document.getElementById("openDownloadModal").addEventListener("click", () => {
+    document.getElementById("downloadModal").style.display = "flex";
+  });
+
+  document.getElementById("closeDownloadModal").addEventListener("click", () => {
+    document.getElementById("downloadModal").style.display = "none";
+  });
+
+  // Initialize Flatpickr inside modal
+  flatpickr("#dateRangeModal", {
+    mode: "range",
+    dateFormat: "Y-m-d",
+    allowInput: true
+  });
+</script>
+<script>
+  async function showAlertDetails(alertData, groupId) {
+    try {
+      if (typeof alertData === "string") {
+        alertData = JSON.parse(decodeURIComponent(alertData));
+      }
+
+      // Set basic fields
+      document.getElementById("modalSummary").textContent = alertData.annotations?.summary || "-";
+
+      // Labels to show
+      const importantKeys = ["snmp_host", "message"];
+      const labels = alertData.labels || {};
+
+      const modalTableBody = document.querySelector("#modalLabelsTable tbody");
+      modalTableBody.innerHTML = ""; // Clear existing rows
+
+      importantKeys.forEach(key => {
+        const value = labels[key] || "-";
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td style="padding: 6px 12px; border: 1px solid #ccc;">${key}</td>
+          <td style="padding: 6px 12px; border: 1px solid #ccc;">${value}</td>
+        `;
+        modalTableBody.appendChild(row);
+      });
+
+      // 🧩 Fetch timeline (from OnCall API)
+      const timelineList = document.getElementById("alertTimeline");
+      timelineList.innerHTML = "<li>Loading timeline...</li>";
+
+      try {
+        const response = await fetch(`/api/oncall-alerts/timeline/${groupId}`);
+        const data = await response.json();
+
+        timelineList.innerHTML = "";  // clear loading
+
+        if (data.error) {
+          document.getElementById("timelineSection").style.display = "none";
+        }
+
+
+        if (Array.isArray(data)) {
+          // Filter the data to exclude items where the 'action' property contains the word 'Escalation' (case-insensitive)
+          const filteredData = data.filter(item => {
+            // Use a regular expression to test for 'Escalation'
+            // /Escalation/i matches 'Escalation' case-insensitively
+            return !/escalation/i.test(item.action);
+          });
+
+          filteredData.forEach(item => {
+            const li = document.createElement("li");
+            li.style.marginBottom = "6px";
+//            li.textContent = `[${new Date(item.created_at).toLocaleString()}] ${item.action.replace("{{author}}", item.author?.username || "API")}`;
+            li.textContent = `[${new Date(item.created_at).toLocaleString()}] ${item.action.replace("{{author}}", " ")}`;
+            timelineList.appendChild(li);
+          });
+        } else {
+          timelineList.innerHTML = "<li>No timeline available.</li>";
+        }
+
+
+      } catch (err) {
+        timelineList.innerHTML = `<li style="color:red;">Failed to load timeline.</li>`;
+        console.error("Error in showAlertDetails:", err);
+      }
+
+
+      // Show the modal
+      document.getElementById("alertDetailsModal").style.display = "flex";
+    } catch (err) {
+      alert("Failed to show alert details.");
+      console.error("Error in showAlertDetails:", err);
+    }
+  }
+  function closeAlertModal() {
+      document.getElementById("alertDetailsModal").style.display = "none";
+    }
+  </script>
+  <script>
+      const loginForm = document.getElementById("loginForm");
+      document.getElementById('loginSource').value = window.location.pathname;
+
+      if (loginForm) {
+        loginForm.addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+
+
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+      const source   = document.getElementById('loginSource').value;
+
+      try {
+      const res = await fetch("/login-ui", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ username, password, source }),
+        credentials: "include"  // <-- important!
+      });
+
+      const result = await res.json();
+
+      if (result.success) {
+        try {
+            await alertSound.play();
+            alertSound.pause();
+            alertSound.currentTime = 0;
+            audioUnlocked = true;
+            localStorage.setItem("audioUnlocked", "true"); // store state
+            console.log("Audio unlocked on form submit click");
+          } catch (err) {
+            console.warn("Audio unlock blocked:", err);
+          }
+
+          window.location.href = window.location.pathname;
+
+          // ✅ Delay page reload so session works
+
+            //setTimeout(() => {
+            //  overlay.style.display = "none";
+            //
+            //}, 10000); // show overlay 3s after reload
+
+
+
+      } else {
+        document.getElementById("loginError").innerText = result.message || "Login failed.";
+      }
+        } catch (err) {
+        document.getElementById("loginError").innerText = "Server error.";
+        console.error("Login failed", err);
+      }
+    });
+  }
+    document.getElementById("logoutLink")?.addEventListener("click", () => {
+      localStorage.removeItem("audioUnlocked");
+      audioUnlocked = false;
+      console.log("Audio unlock flag cleared");
+    });
+
+
+  </script>
+  <!-- popper + bootstrap JS at end of body -->
+  <script
+    src="https://cdn.jsdelivr.net/npm/@popperjs/core@2/dist/umd/popper.min.js"
+    integrity="sha384-xxxxx"
+    crossorigin="anonymous"></script>
+  <script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/js/bootstrap.min.js"
+    integrity="sha384-yyyyy"
+    crossorigin="anonymous"></script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+region: ap-south-1
+image:
+  ecrRepo: 266189958330.dkr.ecr.ap-southeast-1.amazonaws.com/glpi-python-webhook
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: bridge-service-test6 #glpiv4-nprd  #glpiv2-nprd-test #glpiv2-nprd  loadtest
+glpi:
+    glpiUrl: "https://glpi-server-test.monitoring.bfsgodirect.com/apirest.php"  #
+    glpiAppToken: "Zb3WluLPaGKpa8tDAqlv0uzHwYpYK8Z1jDqZ9Cu8"  
+    glpiUserToken: "veZcybc0VU9lzuDN1FigJf2kH1KbbdkrUS6PP9uz" 
+    ivrEndpointUrl: "http://a43e4954e8e574f92ace167661b19049-774331588.ap-southeast-1.elb.amazonaws.com/ivr"
+    ticket_threshold_duration: "600" 
+    ticket_threshold_count: "3"
+    close_ticket_threshold_duration: "900"
+
+database:
+    db_username: "admin"  
+    db_password: "Qwerty123"
+    db_host: "cop-bfdl-nprd-rds.cusvxtfjr17h.ap-southeast-1.rds.amazonaws.com"
+    db_name: "bridge_service"
+    tickets_table_name: "Tickets"
+    alert_history_table_name: "alert_history"
+
+port_expose: 8080

@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>NanoBSC Alarm Monitor</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-zzzzz"
+    crossorigin="anonymous">
+    <style>
+        /* Base styles from noc.html */
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        .container {
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+            width: 100%;
+            max-width: 1400px; /* Wider for this dashboard */
+            display: flex;
+            flex-direction: column;
+            min-height: 800px;
+            transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .header {
+            padding: 20px 30px;
+            border-top-left-radius: 12px;
+            border-top-right-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, border-bottom-color 0.3s ease;
+        }
+
+        .summary-cards {
+             display: flex;
+             flex-wrap: wrap;
+             justify-content: space-between;
+             gap: 15px;
+        }
+
+        .summary-card {
+            flex: 1;
+            border-radius: 10px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-width: 150px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+            border: 1px solid;
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
+            cursor: pointer;
+        }
+        .summary-card:hover {
+            transform: translateY(-2px);
+        }
+        .summary-card.active-tab {
+             box-shadow: 0 0 0 3px var(--color-info);
+             border-color: var(--color-info);
+        }
+
+        .summary-card .count {
+            font-size: 2.25rem;
+            font-weight: 700;
+        }
+        .summary-card .label {
+            font-size: 0.9rem; /* Slightly larger label */
+            text-transform: uppercase;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px; /* Space between legend dot and text */
+        }
+
+        /* New Legend Style */
+        .status-legend-dot {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .alarm-controls {
+            padding: 20px 30px;
+            border-bottom: 1px solid;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: center;
+            transition: background-color 0.3s ease, border-bottom-color 0.3s ease;
+        }
+
+        .alarm-controls input,
+        .alarm-controls select {
+            border: 1px solid;
+            padding: 8px 12px;
+            border-radius: 8px;
+            appearance: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.2s ease;
+            height: 40px;
+        }
+        .alarm-controls input:focus,
+        .alarm-controls select:focus {
+            box-shadow: 0 0 0 3px var(--color-focus-shadow);
+            outline: none;
+        }
+        .alarm-controls select {
+            background-repeat: no-repeat;
+            background-position: right 0.7rem center;
+            background-size: 0.8em 0.8em;
+            padding-right: 2.5rem;
+        }
+
+        .alarm-table-container {
+            flex-grow: 1;
+            -webkit-overflow-scrolling: touch;
+            padding: 20px 30px;
+            overflow: visible;
+        }
+
+        .alarm-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 8px;
+        }
+
+        .alarm-table th,
+        .alarm-table td {
+            padding: 12px 15px;
+            text-align: left;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: visible;
+            position: relative;
+        }
+
+        .alarm-table th {
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .alarm-table thead tr:first-child th:first-child { border-top-left-radius: 8px; }
+        .alarm-table thead tr:first-child th:last-child { border-top-right-radius: 8px; }
+
+        .alarm-table td {
+            border-bottom: 1px solid;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+            transition: background-color 0.3s ease, color 0.3s ease, border-bottom-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        .alarm-table tbody tr:last-child td { border-bottom: none; }
+        .alarm-table tbody tr:last-child td:first-child { border-bottom-left-radius: 8px; }
+        .alarm-table tbody tr:last-child td:last-child { border-bottom-right-radius: 8px; }
+
+        .alarm-table tbody tr {
+            transition: background-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        /* FIX: Title link color */
+        .alert-link {
+            color: inherit;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .alert-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Status colors and tags */
+        .status-tag { padding: 4px 8px; border-radius: 5px; font-size: 0.75rem; font-weight: 600; }
+        .status-firing { background-color: var(--color-critical); color: white; }
+        .status-acknowledged { background-color: var(--color-warning); color: #1c1c1e; }
+        .status-resolved { background-color: var(--color-resolved); color: white; }
+        .status-silenced { background-color: #A0A0A0; color: white; }
+
+        /* Generic Action Button Style */
+        .action-button {
+            padding: 6px 12px; border-radius: 6px; font-size: 0.85rem; cursor: pointer;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+            border: none; font-weight: 600;
+        }
+
+        /* Modal Styling */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 1000; opacity: 1; visibility: visible;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        #loginPageOverlay { padding: 0; align-items: center; }
+        body[data-theme="dark"] #loginPageOverlay { background-color: #000000; }
+        body[data-theme="light"] #loginPageOverlay { background-color: #f2f2f7; }
+
+        .modal-content {
+            padding: 30px; border-radius: 12px; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+            width: 90%; max-width: 700px;
+            transform: scale(1); opacity: 1;
+            transition: transform 0.3s ease, opacity 0.3s ease, background-color 0.3s ease, color 0.3s ease;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-content h2, .modal-content h3 {
+            font-size: 1.75rem; font-weight: 700; margin-bottom: 20px;
+            transition: color 0.3s ease;
+        }
+        .modal-content p { margin-bottom: 10px; line-height: 1.5; }
+        .modal-content label { display: block; margin-top: 10px; font-size: 14px; font-weight: 500; }
+        .modal-content input, .modal-content select {
+            width: 100%; margin-top: 6px; margin-bottom: 16px; padding: 10px; font-size: 14px;
+            border: 1px solid; border-radius: 4px;
+        }
+
+        .modal-actions { display: flex; justify-content: flex-end; gap: 15px; margin-top: 20px; }
+        .modal-actions button {
+            padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer;
+            transition: background-color 0.2s ease, box-shadow 0.2s ease, color 0.2s ease; border: none;
+        }
+        .modal-actions button[type="submit"] { background-color: var(--color-resolved); color: white; }
+        .modal-actions button[type="button"] { background-color: var(--color-bg-button-default); }
+
+        /* --- Dark Theme Variables and Styles --- */
+        body[data-theme="dark"] {
+            background-color: #000000; color: #e5e5ea;
+            --color-critical: #ff453a; --color-warning: #ff9f0a; --color-info: #0a84ff; --color-resolved: #30d158;
+            --color-text-primary: #e5e5ea; --color-text-secondary: #d1d1d6; --color-border-light: #3a3a3c;
+            --color-bg-card: #2c2c2e; --color-bg-main: #1c1c1e; --color-bg-input: #2c2c2e;
+            --color-border-input: #48484a; --color-bg-button-default: #3a3a3c;
+            --color-hover-button-default: #48484a; --color-focus-shadow: rgba(10, 132, 255, 0.3);
+            --color-arrow-svg: '%23e5e5ea';
+        }
+        body[data-theme="dark"] .container { background-color: var(--color-bg-main); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); }
+        body[data-theme="dark"] .header { background: linear-gradient(180deg, #2c2c2e 0%, #1c1c1e 100%); color: var(--color-text-primary); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3); border-bottom-color: var(--color-border-light); }
+        body[data-theme="dark"] .summary-card { background-color: var(--color-bg-card); color: var(--color-text-primary); border-color: var(--color-border-light); }
+        body[data-theme="dark"] .summary-card.critical { background-color: var(--color-critical); }
+        body[data-theme="dark"] .summary-card.warning { background-color: var(--color-warning); color: #1c1c1e;}
+        body[data-theme="dark"] .alarm-controls { background-color: var(--color-bg-main); border-bottom-color: var(--color-border-light); }
+        body[data-theme="dark"] .alarm-controls input, body[data-theme="dark"] .alarm-controls select { background-color: var(--color-bg-input); border-color: var(--color-border-input); color: var(--color-text-primary); }
+        body[data-theme="dark"] .alarm-controls input:focus, body[data-theme="dark"] .alarm-controls select:focus { border-color: var(--color-info); box-shadow: 0 0 0 3px var(--color-focus-shadow); }
+        body[data-theme="dark"] .alarm-controls select { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3e%3cpath d='M7 7l3-3 3 3m0 6l-3 3-3-3' stroke='var(--color-arrow-svg)' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3e%3c/svg%3e"); }
+        /* Darker Table Header */
+        body[data-theme="dark"] .alarm-table th { background-color: #222324; color: var(--color-text-secondary); }
+        body[data-theme="dark"] .alarm-table td { background-color: var(--color-bg-main); border-bottom-color: var(--color-border-light); color: var(--color-text-primary); box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15); }
+        body[data-theme="dark"] .alarm-table tbody tr:hover { background-color: var(--color-bg-card); box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25); }
+        body[data-theme="dark"] .modal-content { background-color: var(--color-bg-main); color: var(--color-text-primary); }
+        body[data-theme="dark"] .modal-content input, body[data-theme="dark"] .modal-content select { background-color: var(--color-bg-input); border-color: var(--color-border-input); color: var(--color-text-primary); }
+
+        /* --- Light Theme Variables and Styles --- */
+        body[data-theme="light"] {
+            background-color: #f2f2f7; color: #1c1c1e;
+            --color-critical: #ff3b30; --color-warning: #ff9500; --color-info: #007aff; --color-resolved: #34c759;
+            --color-text-primary: #1c1c1e; --color-text-secondary: #48484a; --color-border-light: #e5e5ea;
+            --color-bg-card: #ffffff; --color-bg-main: #ffffff; --color-bg-input: #f2f2f7;
+            --color-border-input: #d1d1d6; --color-bg-button-default: #e5e5ea;
+            --color-hover-button-default: #d1d1d6; --color-focus-shadow: rgba(0, 122, 255, 0.2);
+            --color-arrow-svg: '%231c1c1e';
+        }
+        body[data-theme="light"] .container { background-color: var(--color-bg-main); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); }
+        body[data-theme="light"] .header { background: #ffffff; color: var(--color-text-primary); border-bottom: 1px solid var(--color-border-light); }
+        body[data-theme="light"] .summary-card { background-color: var(--color-bg-card); color: var(--color-text-primary); border-color: var(--color-border-light); }
+        body[data-theme="light"] .summary-card.critical { background-color: var(--color-critical); color: white; }
+        body[data-theme="light"] .summary-card.warning { background-color: var(--color-warning); color: white; }
+        body[data-theme="light"] .alarm-controls { background-color: var(--color-bg-main); border-bottom-color: var(--color-border-light); }
+        body[data-theme="light"] .alarm-controls input, body[data-theme="light"] .alarm-controls select { background-color: var(--color-bg-input); border-color: var(--color-border-input); color: var(--color-text-primary); }
+        body[data-theme="light"] .alarm-controls input:focus, body[data-theme="light"] .alarm-controls select:focus { border-color: var(--color-info); box-shadow: 0 0 0 3px var(--color-focus-shadow); }
+        body[data-theme="light"] .alarm-controls select { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='none'%3e%3cpath d='M7 7l3-3 3 3m0 6l-3 3-3-3' stroke='var(--color-arrow-svg)' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3e%3c/svg%3e"); }
+        /* Darker Table Header */
+        body[data-theme="light"] .alarm-table th { background-color: #e5e7eb; color: var(--color-text-secondary); }
+        body[data-theme="light"] .alarm-table td { background-color: var(--color-bg-main); border-bottom-color: var(--color-border-light); color: var(--color-text-primary); box-shadow: none; }
+        body[data-theme="light"] .alarm-table tbody tr:hover { background-color: #f9f9fb; }
+        body[data-theme="light"] .modal-content { background-color: var(--color-bg-main); color: var(--color-text-primary); }
+        body[data-theme="light"] .modal-content input, body[data-theme="light"] .modal-content select { background-color: #ffffff; border-color: var(--color-border-input); color: var(--color-text-primary); }
+
+        /* Other specific styles */
+        .pagination-bar { display: flex; align-items: center; gap: 8px; }
+        .pagination-bar button {
+            padding: 6px 12px; font-size: 14px; border-radius: 6px; border: none; cursor: pointer;
+            background-color: var(--color-info); color: white; font-weight: 600;
+        }
+        .pagination-bar button:disabled { background-color: var(--color-bg-button-default); cursor: not-allowed; }
+        .pagination-bar span { font-size: 14px; margin: 0 8px; }
+
+        #pageLoadingOverlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(4px);
+            z-index: 9999; display: flex; align-items: center; justify-content: center; flex-direction: column;
+        }
+        .spinner {
+            width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid var(--color-resolved);
+            border-radius: 50%; animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Login Form styles */
+        #loginForm {
+            background: var(--color-bg-main); padding: 40px; border-radius: 12px;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.5); color: var(--color-text-primary);
+            width: 400px; max-width: 90%; display: flex; flex-direction: column; gap: 20px;
+        }
+        #loginForm input {
+             background-color: var(--color-bg-input); border-color: var(--color-border-input);
+             color: var(--color-text-primary); padding: 12px; font-size: 16px; border-radius: 6px;
+        }
+        #loginForm button {
+            padding: 12px; font-size: 16px; background-color: var(--color-resolved); color: white;
+            border: none; border-radius: 6px; cursor: pointer;
+        }
+        #loginError { color: var(--color-critical); text-align: center; }
+
+        /* Action dropdowns */
+        .dropdown { position: relative; display: inline-block; }
+        .dropdown-button {
+            padding: 6px 12px; font-size: 14px; border: none; border-radius: 5px; cursor: pointer;
+            display: flex; align-items: center; gap: 5px; color: white;
+        }
+        .dropdown-button.Firing { background-color: var(--color-critical); }
+        .dropdown-button.Acknowledged { background-color: var(--color-warning); color: #1c1c1e; }
+        .dropdown-button.Resolved { background-color: var(--color-resolved); }
+        .dropdown-button::after { content: "▼"; font-size: 10px; margin-left: 5px; }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: var(--color-bg-card);
+            min-width: 160px;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+            z-index: 2000;
+            border-radius: 5px;
+            padding: 4px 0;
+            border: 1px solid var(--color-border-light);
+            flex-direction: column;
+        }
+        .dropdown-content.show {
+            display: flex;
+        }
+        .dropdown-content.drop-up { bottom: 100%; top: auto; margin-bottom: 6px; }
+        .dropdown-content button {
+            width: 100%; padding: 8px 12px; border: none; background-color: transparent;
+            text-align: left; cursor: pointer; font-size: 14px; color: var(--color-text-primary);
+        }
+        .dropdown-content button:hover { background-color: var(--color-hover-button-default); }
+
+        .dropdown-submenu {
+            position: relative;
+        }
+
+        .submenu-options {
+            display: none;
+            position: absolute;
+            right: 100%; /* FIX: Changed from left to right */
+            top: 0;
+            background-color: var(--color-bg-card);
+            padding: 4px 0;
+            min-width: 120px;
+            z-index: 1100;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            border: 1px solid var(--color-border-light);
+            flex-direction: column;
+        }
+        .submenu-options.show {
+            display: flex;
+        }
+
+        .submenu-options button {
+            width: 100%;
+            padding: 8px 12px;
+            border: none;
+            background-color: transparent;
+            text-align: left;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--color-text-primary);
+        }
+        .submenu-options button:hover {
+            background-color: var(--color-hover-button-default);
+        }
+
+    </style>
+</head>
+<body data-theme="dark" class="antialiased">
+    {% if not session.get("logged_in") %}
+        <div id="loginPageOverlay" class="modal-overlay">
+            <form id="loginForm">
+                <input type="hidden" id="loginSource" name="source" value="" />
+                <h2 style="text-align: center;">Login to NanoBSC Portal</h2>
+                <input type="text" id="username" placeholder="Username" required />
+                <input type="password" id="password" placeholder="Password" required />
+                <button type="submit">Login</button>
+                <p id="loginError"></p>
+            </form>
+        </div>
+        <script>
+            // Minimal script for the login page
+            document.addEventListener("DOMContentLoaded", () => {
+                const savedTheme = localStorage.getItem('nanobsc-theme') || 'dark';
+                document.body.setAttribute('data-theme', savedTheme);
+
+                const loginForm = document.getElementById("loginForm");
+                if(loginForm) {
+                    document.getElementById('loginSource').value = window.location.pathname;
+                    loginForm.addEventListener("submit", async function(e) {
+                        e.preventDefault();
+                        const username = document.getElementById("username").value;
+                        const password = document.getElementById("password").value;
+                        const source = document.getElementById('loginSource').value || '/';
+
+                        try {
+                            const res = await fetch("/login-ui", {
+                                method: "POST", headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ username, password, source }),
+                                credentials: "include"
+                            });
+                            const result = await res.json();
+                            if (result.success) {
+                                console.log("Logged In success, redirecting to", source);
+                                // If source still points at the login page, fall back to “/”
+                                const dest = source && !source.includes('login') ? source : '/';
+                                // Use replace() so the login page isn't saved in the browser history
+                                window.location.replace(dest);
+                                try {
+                                    const audio = new Audio();
+                                    // This empty play is a trick to unlock audio on some browsers after a user interaction
+                                    await audio.play().catch(()=>{});
+                                    localStorage.setItem("audioUnlocked", "true");
+                                    console.log("Audio unlocked on login");
+                                } catch (err) { console.warn("Audio unlock on login failed:", err); }
+                            } else {
+                                document.getElementById("loginError").innerText = result.message || "Login failed.";
+                            }
+                        } catch (err) {
+                            document.getElementById("loginError").innerText = "Server error during login.";
+                        }
+                    });
+                }
+            });
+        </script>
+
+    {% else %}
+
+        <div class="container">
+            <div class="header">
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap;">
+                    <h1 style="font-size: 2rem; font-weight: 700;">NanoBSC Alarm Monitor</h1>
+                    {% if session.get("logged_in") %}
+                    <div style="display: flex; align-items: center; gap: 15px;">
+                        <a href="{{ url_for('logout_ui', next='/ipa') }}" id="logoutLink" class="action-button" style="background-color: var(--color-critical); color: white;">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                        <button id="themeToggle" class="action-button">
+                            <i class="fas fa-sun"></i><span style="margin-left: 8px;">Light Mode</span>
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center; width: 100%; flex-wrap: wrap;">
+                    <p id="lastChecked">Last checked: Never</p>
+                </div>
+                <div class="summary-cards">
+                    <div class="summary-card status-filter" data-status="firing">
+                        <div id="statusFiring" class="count">0</div>
+                        <div class="label"><span class="status-legend-dot status-firing"></span>Firing</div>
+                    </div>
+                    <div class="summary-card status-filter" data-status="acknowledged">
+                        <div id="statusAck" class="count">0</div>
+                        <div class="label"><span class="status-legend-dot status-acknowledged"></span>Acknowledged</div>
+                    </div>
+                    <div class="summary-card status-filter" data-status="resolved">
+                        <div id="statusResolved" class="count">0</div>
+                        <div class="label"><span class="status-legend-dot status-resolved"></span>Resolved</div>
+                    </div>
+                    <div class="summary-card status-filter" data-status="silenced">
+                        <div id="statusSilenced" class="count">0</div>
+                        <div class="label"><span class="status-legend-dot status-silenced"></span>Silenced</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alarm-controls">
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button id="soundToggle" class="action-button">🔈 Sound: ON</button>
+                    <button id="openDownloadModal" class="action-button" style="background-color: var(--color-info); color: white;">📥 Export Report</button>
+                </div>
+                <div style="flex: 1 1 auto;"></div> <div style="min-width: 180px;">
+                    <select id="severityFilter" style="width: 100%;">
+                        <option value="">All Severities</option>
+                        <option value="1">1 – Critical</option>
+                        <option value="2">2 – High</option>
+                        <option value="3">3 – Medium</option>
+                        <option value="4">4 – Low</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="alarm-table-container">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <p id="alertsLoadedAt" style="font-size: 14px;">Alerts last loaded: Never</p>
+                    <div id="pagination" class="pagination-bar">
+                        <button onclick="prevPage()" id="prevBtn" disabled>⬅ Prev</button>
+                        <span id="currentPage">Page 1 of 1</span>
+                        <button onclick="nextPage()" id="nextBtn">Next ➡</button>
+                    </div>
+                </div>
+                <table id="oncallAlertsTable" class="alarm-table">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Status</th>
+                        <th>Title</th>
+                        <th>Created</th>
+                        <th>Severity</th>
+                        <th>Actions</th>
+                    </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="pageLoadingOverlay" style="display: none;">
+            <div class="spinner"></div>
+            <p style="color: white; margin-top: 10px;">Loading alerts...</p>
+        </div>
+
+        <audio id="alertSound" src="/static/siren-alert-96052.mp3" preload="auto"></audio>
+
+        <div id="downloadModal" class="modal-overlay" style="display:none;">
+            <div class="modal-content">
+                <h3>📄 Download Report</h3>
+                <form action="/download/nanobsc" method="get">
+                    <label for="dateRangeModal">Select Date Range:</label>
+                    <input type="text" id="dateRangeModal" name="date_range" placeholder="YYYY-MM-DD to YYYY-MM-DD" required>
+                    <label for="formatModal">Select Format:</label>
+                    <select name="format" id="formatModal">
+                        <option value="csv">CSV</option>
+                        <option value="excel">Excel</option>
+                    </select>
+                    <div class="modal-actions">
+                        <button type="submit">Download</button>
+                        <button type="button" id="closeDownloadModal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div id="alertDetailsModal" class="modal-overlay" style="display: none;">
+            <div class="modal-content">
+                <h3>📋 Alert Details</h3>
+                <p><strong>Summary:</strong> <span id="modalSummary">Loading...</span></p>
+                <table id="modalLabelsTable" class="alarm-table" style="margin-top: 15px;">
+                    <thead><tr><th>Key</th><th>Value</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+                <div id="timelineSection" style="margin-top: 20px;">
+                    <h3>📜 Timeline</h3>
+                    <ul id="alertTimeline" style="list-style-type: none; padding-left: 0; max-height: 200px; overflow-y: auto;"></ul>
+                </div>
+                <div class="modal-actions">
+                    <button type="button" onclick="closeAlertModal()">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+        <script>
+            // All dashboard-related JavaScript goes here
+            // --- UI Elements & State ---
+            const statusText = document.getElementById("status");
+            const alertSound = document.getElementById("alertSound");
+            const toggleBtn = document.getElementById("soundToggle");
+            const bodyElement = document.body;
+            const themeToggleBtn = document.getElementById('themeToggle');
+
+            let soundEnabled = true;
+            let audioUnlocked = localStorage.getItem("audioUnlocked") === "true";
+
+            let allAlerts = [];
+            let currentPage = 1;
+            const limit = 10;
+            let totalPages = 1;
+            let currentStatusFilter = [];
+            let isInitialPageLoad = true;
+            let total_store = 0
+            // --- Theme Logic ---
+            function setTheme(theme) {
+                bodyElement.setAttribute('data-theme', theme);
+                localStorage.setItem('nanobsc-theme', theme);
+                const themeToggleIcon = themeToggleBtn.querySelector('i');
+                const themeToggleText = themeToggleBtn.querySelector('span');
+
+                if (theme === 'dark') {
+                    themeToggleIcon.classList.remove('fa-moon');
+                    themeToggleIcon.classList.add('fa-sun');
+                    themeToggleText.textContent = ' Light Mode';
+                } else {
+                    themeToggleIcon.classList.remove('fa-sun');
+                    themeToggleIcon.classList.add('fa-moon');
+                    themeToggleText.textContent = ' Dark Mode';
+                }
+            }
+            function toggleTheme() {
+                const currentTheme = bodyElement.getAttribute('data-theme');
+                setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+            }
+            themeToggleBtn.addEventListener('click', toggleTheme);
+
+            // --- Sound & Alert Checks ---
+            toggleBtn.addEventListener("click", () => {
+                soundEnabled = !soundEnabled;
+                toggleBtn.textContent = soundEnabled ? "🔈 Sound: ON" : "🔇 Sound: OFF";
+                if (!soundEnabled) {
+                    alertSound.pause();
+                    alertSound.currentTime = 0;
+                }
+            });
+
+            async function checkAlerts() {
+                const now = new Date().toLocaleTimeString();
+                document.getElementById("lastChecked").textContent = "Last checked: " + now;
+                try {
+                    const res = await fetch("/api/check/NanoBSC-Alarm");
+                    const data = await res.json();
+                    if (data.firing) {
+                       
+                        if (soundEnabled && audioUnlocked) {
+                            alertSound.play().catch(e => console.warn("Audio play failed:", e));
+                        }
+                    } 
+                } catch (error) {
+                    console.error("Failed to check alerts:", error);
+                   
+                }
+            }
+            
+            // --- Alert Data Fetching and Rendering ---
+            async function fetchOnCallAlerts(page = 1) {
+                const overlay = document.getElementById("pageLoadingOverlay");
+                if (overlay && isInitialPageLoad) overlay.style.display = "flex";
+
+                try {
+                    const res = await fetch(`/api/oncall-alerts/nano-bsc`);
+
+                    // Only proceed if the fetch was successful
+                    if (!res.ok) {
+                        console.error(`Failed to fetch alerts, status: ${res.statusText}`);
+                        document.getElementById("alertsLoadedAt").textContent = `❌ Last fetch failed. Showing stale data.`;
+                        return; // Exit without updating to prevent flicker
+                    }
+
+                    const data = await res.json();
+                    if (total_store < data.total) total_store = data.total ;
+                    const newAlerts = data.results || [];
+                    console.log("length of new alerts:",newAlerts.length );
+                    // If we got at least one alert, update everything;
+                    // otherwise skip and leave the old UI alone
+                    if (newAlerts.length > total_store || newAlerts.length === total_store) {
+                      allAlerts = newAlerts;
+                  
+                    }
+                    const total = data.total || allAlerts.length;
+                    console.log("length of all alerts and total:",allAlerts.length, total );
+                    // Only update the UI if the response contains a valid 'results' array
+                        
+                        // =================================================================
+                        // === FIX APPLIED: PREVENT FLICKER ON TRANSIENT EMPTY RESPONSE ===
+                        // =================================================================
+                        // If the new fetch is empty but we already have alerts displayed,
+                        // it's likely a transient API blip. We will log it and skip the UI update
+                        // to prevent the table from flickering to an empty state.
+                    
+
+                        const loadedAt = new Date().toLocaleString();
+                        document.getElementById("alertsLoadedAt").textContent = `✅ Last loaded: ${loadedAt}`;
+
+                        const counts = { firing: 0, acknowledged: 0, resolved: 0, silenced: 0 };
+                        allAlerts.forEach(g => {
+                            const state = g.state.toLowerCase();
+                            if (counts[state] !== undefined) counts[state]++;
+                        });
+
+                        document.getElementById("statusFiring").textContent = counts.firing;
+                        document.getElementById("statusAck").textContent = counts.acknowledged;
+                        document.getElementById("statusResolved").textContent = counts.resolved;
+                        document.getElementById("statusSilenced").textContent = counts.silenced;
+
+                        renderAlertsTable(allAlerts);
+                    }
+                 catch (err) {
+                    console.error("Failed to fetch on-call alerts:", err);
+                    document.getElementById("alertsLoadedAt").textContent = `❌ Network error. Showing stale data.`;
+                } finally {
+                    if (overlay && isInitialPageLoad) {
+                        overlay.style.display = "none";
+                        isInitialPageLoad = false;
+                        
+                    }
+                }
+            }
+
+            function getActionButtons(group) {
+                const status = (group.state || "").toLowerCase();
+              let actions = [];
+
+              if (status === "firing") actions = ["acknowledge", "resolve", "silence"];
+              else if (status === "acknowledged") actions = ["unacknowledge", "resolve"];
+              else if (status === "resolved") actions = ["unresolve"];
+              else if (status === "silenced") actions = ["unsilence"];
+
+              return actions.map(action => {
+                if (action === "silence") {
+                  return `<div class="dropdown-submenu">
+                      <button class="submenu-toggle">${capitalize(action)} ▸</button>
+                      <div class="submenu-options">
+                        <button data-group-id="${group.id}" data-action="silence" data-delay="3600">1h</button>
+                        <button data-group-id="${group.id}" data-action="silence" data-delay="10800">3h</button>
+                        <button data-group-id="${group.id}" data-action="silence" data-delay="21600">6h</button>
+                        <button data-group-id="${group.id}" data-action="silence" data-delay="-1">Forever</button>
+                      </div>
+                    </div>`;
+                } else {
+                  return `<button data-group-id="${group.id}" data-action="${action}">${capitalize(action)}</button>`;
+                }
+              }).join("");
+            }
+
+            function capitalize(str) {
+              return str.charAt(0).toUpperCase() + str.slice(1);
+            }
+
+            function renderAlertsTable(data) {
+                const oldTableBody = document.querySelector("#oncallAlertsTable tbody");
+                let newBodyHTML = "";
+
+                const wantedSev = document.getElementById('severityFilter').value;
+                const filtered = data
+                    .filter(group => {
+                        const sev = String(group.last_alert?.payload?.alerts?.[0]?.labels?.detected_level || '');
+                        return sev !== '5';
+                    })
+                    .filter(group => currentStatusFilter.length === 0 || currentStatusFilter.includes(group.state))
+                    .filter(group => {
+                        if (!wantedSev) return true;
+                        const sev = String(group.last_alert?.payload?.alerts?.[0]?.labels?.detected_level || '');
+                        return sev === wantedSev;
+                    });
+
+                if (filtered.length === 0) {
+                    newBodyHTML = `<tr><td colspan="6" style="text-align:center; padding: 20px;">🚫 No matching alerts found.</td></tr>`;
+                } else {
+                    const start = (currentPage - 1) * limit;
+                    const paginated = filtered.slice(start, start + limit);
+
+                    paginated.forEach(group => {
+                        const status = group.state;
+                        const alert = group?.last_alert?.payload?.alerts?.[0] || {};
+                        const labels = alert.labels || {};
+                        const severity = labels.detected_level || 'N/A';
+                        const stateClass = status.charAt(0).toUpperCase() + status.slice(1);
+
+                        newBodyHTML += `
+                            <tr>
+                                <td>${group.id}</td>
+                                <td><span class="status-tag status-${status}">${capitalize(status)}</span></td>
+                                <td><a href="#" class="alert-link" data-alert='${JSON.stringify(alert).replace(/'/g, "&apos;")}' data-id="${group.id}">${group.title?.trim() || "-"}</a></td>
+                                <td>${new Date(group.created_at).toLocaleString()}</td>
+                                <td>${severity}</td>
+                                <td>
+                                    <div class="dropdown">
+                                        <button class="dropdown-button ${stateClass}">${capitalize(group.state)}</button>
+                                        <div class="dropdown-content">
+                                            ${getActionButtons(group)}
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+
+                const newTableBody = document.createElement('tbody');
+                newTableBody.innerHTML = newBodyHTML;
+                oldTableBody.parentNode.replaceChild(newTableBody, oldTableBody);
+
+                totalPages = Math.ceil(filtered.length / limit);
+                updatePaginationUI(currentPage, totalPages);
+            }
+
+            // --- Actions Menu & Modals Logic (FIXED) ---
+
+            // Use event delegation for all dynamic content clicks
+            document.getElementById('oncallAlertsTable').addEventListener('click', function(e) {
+                const button = e.target;
+
+                // --- Handle Main Dropdown Toggle ---
+                if (button.classList.contains('dropdown-button')) {
+                    e.preventDefault();
+                    const dropdownContent = button.nextElementSibling;
+                    const isShown = dropdownContent.classList.contains('show');
+
+                    // Close all other dropdowns first
+                    document.querySelectorAll('.dropdown-content.show').forEach(d => {
+                        if (d !== dropdownContent) {
+                           d.classList.remove('show');
+                           d.querySelectorAll('.submenu-options.show').forEach(sub => sub.classList.remove('show'));
+                        }
+                    });
+
+                    // If it wasn't already shown, show it and position it
+                    if (!isShown) {
+                        dropdownContent.classList.add('show');
+                        const rect = button.getBoundingClientRect();
+                        const spaceBelow = window.innerHeight - rect.bottom;
+                        dropdownContent.classList.toggle('drop-up', spaceBelow < dropdownContent.offsetHeight + 10);
+                    } else {
+                        dropdownContent.classList.remove('show');
+                    }
+                    return;
+                }
+
+                // --- Handle Submenu Toggle ---
+                if (button.classList.contains('submenu-toggle')) {
+                    e.preventDefault();
+                    e.stopPropagation(); // Prevent main dropdown from closing
+                    const submenu = button.nextElementSibling;
+                    submenu.classList.toggle('show');
+                    return;
+                }
+
+                // --- Handle Action Button Clicks ---
+                if (button.matches('[data-action]')) {
+                    e.preventDefault();
+                    const groupId = button.dataset.groupId;
+                    const action = button.dataset.action;
+                    const delay = button.dataset.delay || null;
+                    performAlertAction(groupId, action, delay);
+                    // Close the parent dropdown
+                    button.closest('.dropdown-content')?.classList.remove('show');
+                }
+            });
+
+            // Global click listener to close dropdowns when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!event.target.closest('.dropdown')) {
+                    document.querySelectorAll('.dropdown-content.show, .submenu-options.show').forEach(d => {
+                        d.classList.remove('show');
+                    });
+                }
+            });
+
+
+            async function performAlertAction(groupId, action, delay = null) {
+                const options = { method: "POST", headers: { "Content-Type": "application/json" } };
+                if (action === "silence") {
+                    options.body = JSON.stringify({ delay: delay || -1 });
+                }
+                try {
+                    const res = await fetch(`/api/oncall-alerts/${groupId}/${action}`, options);
+                    const result = await res.json();
+                    if (result.status === "success") {
+                        fetchOnCallAlerts(currentPage);
+                    } else {
+                        alert("Action failed: " + (result.message || result.error || "Unknown error"));
+                    }
+                } catch (error) {
+                    alert("Action failed due to a network error.");
+                    console.error("Perform alert action error:", error);
+                }
+            }
+
+            async function showAlertDetails(alertData, groupId) {
+                if (typeof alertData === 'string') alertData = JSON.parse(alertData);
+                document.getElementById("modalSummary").textContent = alertData.annotations?.summary || "-";
+
+                const importantKeys = ["cause_text", "hostname", "message", "source", "cause_value", "cause_type", "detected_level", "mo_class", "mo_instance"];
+                const labels = alertData.labels || {};
+                const modalTableBody = document.querySelector("#modalLabelsTable tbody");
+                modalTableBody.innerHTML = "";
+                importantKeys.forEach(key => {
+                    if(labels[key]) {
+                        const row = `<tr><td>${key}</td><td>${labels[key]}</td></tr>`;
+                        modalTableBody.innerHTML += row;
+                    }
+                });
+
+                const timelineList = document.getElementById("alertTimeline");
+                timelineList.innerHTML = "<li>Loading...</li>";
+                try {
+                    const response = await fetch(`/api/oncall-alerts/timeline/${groupId}`);
+                    const data = await response.json();
+                    timelineList.innerHTML = "";
+                    if (Array.isArray(data)) {
+                        data.filter(item => !/escalation/i.test(item.action))
+                            .forEach(item => {
+                                const li = document.createElement("li");
+                                li.textContent = `[${new Date(item.created_at).toLocaleString()}] ${item.action.replace("{{author}}", item.author?.username || "System")}`;
+                                timelineList.appendChild(li);
+                            });
+                    } else {
+                        timelineList.innerHTML = "<li>No timeline available.</li>";
+                    }
+                } catch (err) {
+                    timelineList.innerHTML = `<li style="color:red;">Failed to load timeline.</li>`;
+                }
+
+                document.getElementById("alertDetailsModal").style.display = "flex";
+            }
+
+            function closeAlertModal() {
+                document.getElementById("alertDetailsModal").style.display = "none";
+            }
+
+            // --- Pagination ---
+            function prevPage() { if (currentPage > 1) { currentPage--; renderAlertsTable(allAlerts); } }
+            function nextPage() { if (currentPage < totalPages) { currentPage++; renderAlertsTable(allAlerts); } }
+            function updatePaginationUI(current, total) {
+                document.getElementById("currentPage").textContent = `Page ${current} of ${total}`;
+                document.getElementById("prevBtn").disabled = current === 1;
+                document.getElementById("nextBtn").disabled = current === total;
+            }
+
+            // --- Initializers & Event Listeners ---
+            document.addEventListener("DOMContentLoaded", () => {
+                const savedTheme = localStorage.getItem('nanobsc-theme') || 'dark';
+                setTheme(savedTheme);
+
+                document.getElementById("openDownloadModal").addEventListener("click", () => document.getElementById("downloadModal").style.display = "flex");
+                document.getElementById("closeDownloadModal").addEventListener("click", () => document.getElementById("downloadModal").style.display = "none");
+                flatpickr("#dateRangeModal", { mode: "range", dateFormat: "Y-m-d" });
+
+                document.addEventListener("click", function(event) {
+                    const link = event.target.closest(".alert-link");
+                    if (link) {
+                        event.preventDefault();
+                        showAlertDetails(link.getAttribute("data-alert"), link.getAttribute("data-id"));
+                    }
+                });
+
+                document.querySelectorAll('.status-filter').forEach(box => {
+                    box.addEventListener('click', function () {
+                        const status = this.getAttribute("data-status");
+                        document.querySelectorAll('.status-filter').forEach(b => b.classList.remove('active-tab'));
+                        if (currentStatusFilter[0] === status) {
+                            currentStatusFilter = [];
+                        } else {
+                            this.classList.add('active-tab');
+                            currentStatusFilter = [status];
+                        }
+                        currentPage = 1;
+                        renderAlertsTable(allAlerts);
+                    });
+                });
+
+                document.getElementById('severityFilter').addEventListener('change', () => {
+                    currentPage = 1;
+                    renderAlertsTable(allAlerts);
+                });
+
+                fetchOnCallAlerts(1);
+                checkAlerts();
+                setInterval(fetchOnCallAlerts, 15000);
+                setInterval(checkAlerts, 15000);
+            });
+        </script>
+
+    {% endif %}
+</body>
+</html>

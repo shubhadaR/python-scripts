@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: bridge-service-configmap
+data:
+  resource_mapping.json: |-
+    {
+      "resource_mapping": [
+        {
+          "resource_name": "EC2",
+          "identifierkey": "instance"
+        },
+        {
+          "resource_name": "ECS",
+          "identifierkey": "service"
+        },
+        {
+          "resource_name": "RDS",
+          "identifierkey": "dimension_DBInstanceIdentifier"
+        },
+        {
+          "resource_name": "Lambda",
+          "identifierkey": "dimension_FunctionName"
+        },
+        {
+          "resource_name": "Elastic Cache",
+          "identifierkey": "dimension_CacheClusterId"
+        },
+        {
+          "resource_name": "Elastic Search",
+          "identifierkey": "dimension_DomainName"
+        },
+        {
+          "resource_name": "SNS",
+          "identifierkey": "dimension_TopicName"
+        },
+        {
+          "resource_name": "LoadBalancers",
+          "identifierkey": "dimension_LoadBalancer"
+        },
+        {
+          "resource_name": "SQS",
+          "identifierkey": "dimension_QueueName"
+        },
+        {
+          "resource_name": "DocumentDB",
+          "identifierkey": "dimension_DBInstanceIdentifier"
+        },
+        {
+          "resource_name": "Database Migration Service",
+          "identifierkey": "dimension_ReplicationTaskIdentifier"
+        }
+      ]
+    }

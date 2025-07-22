@@ -1,0 +1,64 @@
+# templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bridge-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bridge-service
+  template:
+    metadata:
+      labels:
+        app: bridge-service
+    spec:
+      nodeSelector:
+        beta.kubernetes.io/arch: arm64
+      containers:
+        - name: bridge-service
+          image: "{{ .Values.image.ecrRepo }}:{{ .Values.image.tag }}"
+          imagePullPolicy: Always
+          env:
+            - name: GLPI_URL
+              value: {{ .Values.glpi.glpiUrl }}
+            - name: GLPI_APP_TOKEN
+              value: {{ .Values.glpi.glpiAppToken }}
+            - name: GLPI_USER_TOKEN
+              value:  {{ .Values.glpi.glpiUserToken }}  
+            - name: IVR_ENDPOINT_URL
+              value:  {{ .Values.glpi.ivrEndpointUrl }}   
+            - name: DB_USERNAME
+              value: {{ .Values.database.db_username }} 
+            - name: DB_PASSWORD
+              value: {{ .Values.database.db_password }} 
+            - name: DB_HOST
+              value: {{ .Values.database.db_host }} 
+            - name: DB_PORT
+              value: "3306" #{{ .Values.database.db_port }}
+            - name: DB_NAME
+              value: {{ .Values.database.db_name }}   
+            - name: TICKETS_TABLE_NAME
+              value: {{ .Values.database.tickets_table_name}}  
+            - name: ALERT_HISTORY_TABLE_NAME
+              value: {{ .Values.database.alert_history_table_name}}  
+            - name: TICKET_THRESHOLD_COUNT
+              value: {{ .Values.glpi.ticket_threshold_count | quote }}
+            - name: TICKET_THRESHOLD_DURATION
+              value: {{ .Values.glpi.ticket_threshold_duration | quote }}
+            - name: CLOSE_TICKET_THRESHOLD_DURATION
+              value: {{ .Values.glpi.close_ticket_threshold_duration | quote }}
+            - name: RESOURCE_MAPPING
+              valueFrom:
+                configMapKeyRef:
+                  name: bridge-service-configmap
+                  key: resource_mapping.json                      
+          ports:
+            - containerPort:  {{ .Values.port_expose }}  # Change this to the port your Python script listens on
+          resources:
+            limits:
+              cpu: 300m
+              memory: 2Gi
+            requests:
+              cpu: 300m
+              memory: 2Gi
